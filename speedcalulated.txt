@@ -1,0 +1,83 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+class DataSet {
+    private double distance;
+    private double time;
+    private double speed;
+
+    public DataSet(double distance, double time) {
+        this.distance = distance;
+        this.time = time;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public double getTime() {
+        return time;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+}
+
+class UserInput {
+    private List<DataSet> dataSets;
+
+    public UserInput() {
+        this.dataSets = new ArrayList<>();
+    }
+
+    public void setUserInputs(List<String> inputs) {
+        for (String input : inputs) {
+            String[] values = input.split(", ");
+            double distance = Double.parseDouble(values[0].replace("KM", ""));
+            double time = Double.parseDouble(values[1].replace("hrs", ""));
+            this.dataSets.add(new DataSet(distance, time));
+        }
+    }
+
+    public List<DataSet> getDataSets() {
+        return dataSets;
+    }
+}
+
+class Measure {
+    public static void measureSpeed(List<DataSet> dataSets) {
+        for (DataSet dataSet : dataSets) {
+            dataSet.setSpeed(dataSet.getDistance() / dataSet.getTime());
+        }
+    }
+}
+
+class ShowResults {
+    public static void writeToCSV(List<DataSet> dataSets, String filename) {
+        try (FileWriter fileWriter = new FileWriter(filename)) {
+            fileWriter.write("distance,time,speed\n");
+            for (DataSet dataSet : dataSets) {
+                fileWriter.write(String.format("%.2f,%.2f,%.2f\n", dataSet.getDistance(), dataSet.getTime(), dataSet.getSpeed()));
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the file: " + e.getMessage());
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        List<String> inputs = List.of("100KM, 2hrs", "200KM, 2.5hrs", "10.5KM, 0.56hrs");
+        UserInput userInput = new UserInput();
+        userInput.setUserInputs(inputs);
+        Measure.measureSpeed(userInput.getDataSets());
+        ShowResults.writeToCSV(userInput.getDataSets(), "results.csv");
+    }
+}
